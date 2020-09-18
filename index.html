@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+
+        }
+
+        .big {
+            position: relative;
+            height: 600px;
+            width: 1000px;
+            margin: 50px auto;
+            border: 4px solid black;
+            text-align: center;
+            font-size: 30px;
+        }
+
+        .box {
+            width: 80px;
+            height: 80px;
+            background-color: rgb(248, 227, 33);
+            position: absolute;
+            border-radius: 50%;
+            left: 100px;
+            top: 100px;
+            overflow: hidden;
+            transform: rotate(0deg);
+        }
+
+        .box::before {
+            position: absolute;
+            content: '';
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            left: 42px;
+            top: 12px;
+            background-color: white;
+        }
+
+        .box::after {
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            left: 26px;
+            top: 35px;
+            border-left: 16px solid transparent;
+            border-right: 48px solid #fff;
+            border-bottom: 1px solid transparent;
+            animation: mymove 1s infinite;
+        }
+
+        .box2 {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            left: 400px;
+            top: 100px;
+            background-color: rgb(248, 227, 33);
+        }
+
+        /* 吃豆人嘴巴动画 */
+        @keyframes mymove {
+            50% {
+                border-bottom: 60px solid transparent;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="fen">
+        <h2>得分：</h2>
+    </div>
+    <div class="big" id="big">
+        <div class="box" id="box"></div>
+        <div class="box2" id="box2"></div>
+    </div>
+</body>
+<script>
+    //**************************************************//
+    //二阶段实验
+    // 获取元素
+    let box = document.getElementById('box');
+    let big = document.getElementById('big');
+
+    let box2 = document.getElementById('box2');
+    let timeId = null;
+    let offL = null;
+    let offT = null;
+    let jf = document.querySelector('div>h2');
+    // 声明豆子位置变量
+    let b2l = null;
+    let b2t = null;
+    // 积分
+    let f = 0;
+    // 豆子的随机位置
+    function num() {
+        b2l = Math.ceil(Math.random() * 800 + 100);
+        b2t = Math.ceil(Math.random() * 400 + 100);
+        box2.style.left = b2l + 'px';
+        box2.style.top = b2t + 'px';
+    }
+    //延时触发 
+    function time() {
+        setInterval(num(), 1000);
+    }
+    num();
+    document.onkeydown = function (e) {
+        clearInterval(timeId)
+        timeId = setInterval(function () {
+            let l = parseFloat(getComputedStyle(box, null).left); //大盒子的初始位置
+            let t = parseFloat(getComputedStyle(box, null).top); //大盒子的初始位置
+            offL = box.offsetLeft;
+            offT = box.offsetTop;
+            // 获取豆子位置
+            b2l = box2.offsetLeft;
+            b2t = box2.offsetTop;
+            // 回车重置方块的位置
+            if (e.keyCode == 13) {
+                clearInterval(timeId);
+                f = 0;
+                box.style.transform = 'rotate(0deg)';
+                box.style.left = 100 + 'px';
+                box.style.top = 100 + 'px';
+            }
+            // 判断方块是否超出界限
+            if (offL <= 0 || offL >= 1000 - 80 || offT <= 0 || offT >= 600 - 80) {
+                alert('游戏结束 按下回车重新开始游戏')
+                clearInterval(timeId);
+                // 方块移动
+            } else {
+                if (e.keyCode == 38) {
+                    box.style.transform = 'rotate(270deg)';
+                    t -= 6;
+                    box.style.top = t + 'px';
+                } else if (e.keyCode == 40) {
+                    box.style.transform = 'rotate(90deg)';
+                    t += 6;
+                    box.style.top = t + 'px';
+                } else if (e.keyCode == 37) {
+                    box.style.transform = 'rotatey(180deg)';
+                    l -= 6;
+                    box.style.left = l + 'px';
+                } else if (e.keyCode == 39) {
+                    box.style.transform = 'rotate(0deg)';
+                    l += 6;
+                    box.style.left = l + 'px';
+                } else if (e.keyCode == 32) {
+                    clearInterval(timeId);
+                }
+            }
+
+            // 判断吃豆人与豆子之间的距离
+            let disL = Math.abs(b2l - offL);
+            let disT = Math.abs(b2t - offT);
+            console.log(disL, disT);
+            if (offL > b2l || offT > b2t) {
+                if (disT < 30 && disL < 30) {
+                    time();
+                    f++;
+                }
+            } else {
+                if (disT < 50 && disL < 50) {
+                    time();
+                    f++
+                }
+            }
+            jf.innerHTML = '得分：' + f;
+        }, 20)
+    }
+</script>
+
+</html>
